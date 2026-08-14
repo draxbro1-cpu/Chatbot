@@ -1,0 +1,8 @@
+# Dependencies
+node_modules/
+
+# Environment — never commit real credentials
+.env
+
+# Old build output (now using admin/dist/)
+public/
