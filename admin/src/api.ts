@@ -1,5 +1,9 @@
 import type { Business, Member, Schedule, Session, Stats } from './types'
 
+// In dev: empty string (Vite proxy handles /api → localhost:3500)
+// In production build: points to Render backend
+const BASE = import.meta.env.VITE_API_BASE ?? ''
+
 let _token = ''
 
 export function setToken(t: string) {
@@ -13,7 +17,7 @@ function headers(): HeadersInit {
 }
 
 async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
-  const res = await fetch(url, { ...options, headers: headers() })
+  const res = await fetch(BASE + url, { ...options, headers: headers() })
   if (!res.ok) {
     const msg = await res.text().catch(() => res.statusText)
     throw new Error(msg || `HTTP ${res.status}`)
@@ -107,7 +111,7 @@ export async function uploadFile(file: File): Promise<{ url: string; type: 'imag
   const form = new FormData()
   form.append('file', file)
   // Do NOT set Content-Type — browser adds multipart boundary automatically
-  const res = await fetch('/api/upload', {
+  const res = await fetch(BASE + '/api/upload', {
     method: 'POST',
     headers: _token ? { 'x-admin-token': _token } : {},
     body: form,
