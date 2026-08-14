@@ -1,10 +1,20 @@
 require("dotenv").config();
 const dns = require("dns");
 dns.setServers(["8.8.8.8", "8.8.4.4"]);
-const express  = require("express");
-const cors     = require("cors");
-const mongoose = require("mongoose");
-const path     = require("path");
+const express    = require("express");
+const cors       = require("cors");
+const mongoose   = require("mongoose");
+const path       = require("path");
+const multer     = require("multer");
+const cloudinary = require("cloudinary").v2;
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key:    process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 100 * 1024 * 1024 } });
 
 const app  = express();
 const PORT = process.env.PORT || 3500;
@@ -263,6 +273,25 @@ app.post("/api/business/:id/deactivate", auth, wrap(async (req, res) => {
 
   const businesses = await Business.find({ wabaId: biz.wabaId }).lean();
   res.json({ deactivated: req.params.id, businesses });
+}));
+
+// ─── Cloudinary Upload ────────────────────────────────────────────────────────
+// POST /api/upload — multipart/form-data, field name: "file"
+app.post("/api/upload", auth, upload.single("file"), wrap(async (req, res) => {
+  if (!req.file) return res.status(400).json({ error: "No file provided" });
+
+  const isVideo    = req.file.mimetype.startsWith("video/");
+  const resourceType = isVideo ? "video" : "image";
+
+  const result = await new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { resource_type: resourceType, folder: "trio-admin" },
+      (err, data) => err ? reject(err) : resolve(data)
+    );
+    stream.end(req.file.buffer);
+  });
+
+  res.json({ url: result.secure_url, public_id: result.public_id, type: resourceType });
 }));
 
 // ─── SPA catch-all — must come after all API routes ──────────────────────────

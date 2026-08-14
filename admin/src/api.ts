@@ -102,6 +102,23 @@ export function clearSessions(businessId: string) {
   return request<{ deleted: number }>(`/api/sessions?businessId=${encodeURIComponent(businessId)}`, { method: 'DELETE' })
 }
 
+// Upload file to Cloudinary via backend — returns { url, type }
+export async function uploadFile(file: File): Promise<{ url: string; type: 'image' | 'video' }> {
+  const form = new FormData()
+  form.append('file', file)
+  // Do NOT set Content-Type — browser adds multipart boundary automatically
+  const res = await fetch('/api/upload', {
+    method: 'POST',
+    headers: _token ? { 'x-admin-token': _token } : {},
+    body: form,
+  })
+  if (!res.ok) {
+    const msg = await res.text().catch(() => res.statusText)
+    throw new Error(msg || `HTTP ${res.status}`)
+  }
+  return res.json()
+}
+
 // Activate one business, deactivate all others under same WABA
 export function activateBusiness(id: string) {
   return request<{ activated: string; businesses: Business[] }>(
