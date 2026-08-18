@@ -82,9 +82,15 @@ const SessionSchema = new mongoose.Schema({
   pausedAt:      Date,
 }, { collection: "rag_sessions" });
 
+const BotFlagSchema = new mongoose.Schema({
+  botId:  { type: String, required: true, unique: true }, // 'flownware' | 'realestate'
+  active: { type: Boolean, default: true },
+}, { collection: "bot_flags" });
+
 const Business = mongoose.model("AdminBusiness", BusinessSchema);
 const Member   = mongoose.model("AdminMember",   MemberSchema);
 const Schedule = mongoose.model("AdminSchedule", ScheduleSchema);
+const BotFlag  = mongoose.model("AdminBotFlag",  BotFlagSchema);
 const Session  = mongoose.model("AdminSession",  SessionSchema);
 
 // ─── Async wrapper — Express 4 doesn't auto-catch async errors ────────────────
@@ -297,6 +303,32 @@ app.post("/api/business/:id/deactivate", auth, wrap(async (req, res) => {
 
   const businesses = await Business.find({ wabaId: biz.wabaId }).lean();
   res.json({ deactivated: req.params.id, businesses });
+}));
+
+// ─── Bot Flags (Flownware / Real Estate hardcoded bots) ──────────────────────
+
+// GET /api/bot-flags — returns { flownware: bool, realestate: bool }
+app.get("/api/bot-flags", auth, wrap(async (req, res) => {
+  const flags = await BotFlag.find({ botId: { $in: ["flownware", "realestate"] } }).lean();
+  const result = { flownware: true, realestate: true }; // default active
+  flags.forEach(f => { result[f.botId] = f.active; });
+  res.json(result);
+}));
+
+// POST /api/bot-flags/:botId/activate
+app.post("/api/bot-flags/:botId/activate", auth, wrap(async (req, res) => {
+  const { botId } = req.params;
+  if (!["flownware", "realestate"].includes(botId)) return res.status(400).json({ error: "Invalid botId" });
+  await BotFlag.findOneAndUpdate({ botId }, { active: true }, { upsert: true });
+  res.json({ botId, active: true });
+}));
+
+// POST /api/bot-flags/:botId/deactivate
+app.post("/api/bot-flags/:botId/deactivate", auth, wrap(async (req, res) => {
+  const { botId } = req.params;
+  if (!["flownware", "realestate"].includes(botId)) return res.status(400).json({ error: "Invalid botId" });
+  await BotFlag.findOneAndUpdate({ botId }, { active: false }, { upsert: true });
+  res.json({ botId, active: false });
 }));
 
 // ─── Cloudinary Upload ────────────────────────────────────────────────────────

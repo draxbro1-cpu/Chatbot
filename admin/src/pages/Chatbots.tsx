@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { activateBusiness, deactivateBusiness } from '../api'
+import { activateBusiness, deactivateBusiness, getBotFlags, activateBotFlag, deactivateBotFlag } from '../api'
 import { useAuth, useToast } from '../context'
 import type { Business } from '../types'
 
@@ -43,6 +43,27 @@ export default function Chatbots() {
   const { addToast } = useToast()
   const navigate = useNavigate()
   const [activating, setActivating] = useState<string | null>(null)
+  const [botFlags, setBotFlags] = useState<{ flownware: boolean; realestate: boolean }>({ flownware: true, realestate: true })
+  const [flagLoading, setFlagLoading] = useState<string | null>(null)
+
+  useEffect(() => {
+    getBotFlags().then(setBotFlags).catch(() => {})
+  }, [])
+
+  async function handleFlagToggle(botId: string, currentlyActive: boolean) {
+    setFlagLoading(botId)
+    try {
+      const result = currentlyActive
+        ? await deactivateBotFlag(botId)
+        : await activateBotFlag(botId)
+      setBotFlags(prev => ({ ...prev, [botId]: result.active }))
+      addToast(result.active ? `${botId} bot activated!` : `${botId} bot deactivated`)
+    } catch (e) {
+      addToast('Failed: ' + (e instanceof Error ? e.message : 'Unknown'), 'error')
+    } finally {
+      setFlagLoading(null)
+    }
+  }
 
   const handleActivate = async (biz: Business) => {
     if (biz.active || activating) return
@@ -220,55 +241,85 @@ export default function Chatbots() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-        {HARDCODED_BOTS.map(bot => (
-          <div
-            key={bot.id}
-            className="relative bg-surface border border-blue-500/20 rounded-2xl overflow-hidden transition-all duration-200 hover:border-blue-500/40 hover:shadow-md"
-          >
-            {/* Top accent bar */}
-            <div className={`h-1 w-full bg-gradient-to-r ${bot.gradient}`} />
+        {HARDCODED_BOTS.map(bot => {
+          const isActive = botFlags[bot.id as keyof typeof botFlags]
+          const isLoading = flagLoading === bot.id
+          return (
+            <div
+              key={bot.id}
+              className={`relative bg-surface border rounded-2xl overflow-hidden transition-all duration-200 ${
+                isActive
+                  ? 'border-green-500/40 shadow-lg shadow-green-500/5 ring-1 ring-green-500/10'
+                  : 'border-border hover:border-[#2e3250]'
+              }`}
+            >
+              {/* Top accent bar */}
+              <div className={`h-1 w-full bg-gradient-to-r ${bot.gradient}`} />
 
-            <div className="p-5">
-              {/* Card header */}
-              <div className="flex items-start justify-between gap-3 mb-4">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${bot.gradient} flex items-center justify-center text-xl flex-shrink-0`}>
-                    {bot.icon}
+              <div className="p-5">
+                {/* Card header */}
+                <div className="flex items-start justify-between gap-3 mb-4">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${bot.gradient} flex items-center justify-center text-xl flex-shrink-0`}>
+                      {bot.icon}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-bold text-foreground leading-tight truncate">{bot.name}</p>
+                      <p className="text-xs text-muted capitalize mt-0.5">{bot.type}</p>
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <p className="font-bold text-foreground leading-tight truncate">{bot.name}</p>
-                    <p className="text-xs text-muted capitalize mt-0.5">{bot.type}</p>
-                  </div>
+                  {/* Status badge */}
+                  <span className={`flex-shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${
+                    isActive
+                      ? 'bg-green-500/10 text-green-400 border-green-500/20'
+                      : 'bg-surface2 text-muted border-border'
+                  }`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-green-400 animate-pulse' : 'bg-[#4b5563]'}`} />
+                    {isActive ? 'Active' : 'Inactive'}
+                  </span>
                 </div>
-                {/* Always active badge */}
-                <span className="flex-shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border bg-green-500/10 text-green-400 border-green-500/20">
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-                  Active
-                </span>
+
+                {/* Trigger */}
+                <div className="flex items-start gap-2 mb-3">
+                  <span className="text-xs text-muted mt-0.5">Trigger:</span>
+                  <code className={`text-xs px-2 py-0.5 rounded-md font-mono bg-surface2 border border-border ${bot.accent} leading-relaxed`}>
+                    {bot.trigger}
+                  </code>
+                </div>
+
+                {/* Description */}
+                <p className="text-xs text-muted mb-4 leading-relaxed">{bot.desc}</p>
+
+                {/* Buttons */}
+                <div className="flex gap-2">
+                  {isActive ? (
+                    <button
+                      onClick={() => handleFlagToggle(bot.id, true)}
+                      disabled={isLoading}
+                      className="flex-1 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 disabled:opacity-40 disabled:cursor-not-allowed text-red-400 text-sm font-semibold transition-colors"
+                    >
+                      {isLoading ? <span className="flex items-center justify-center gap-2"><span className="w-3.5 h-3.5 border-2 border-red-400/40 border-t-red-400 rounded-full animate-spin" />...</span> : 'Deactivate'}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleFlagToggle(bot.id, false)}
+                      disabled={isLoading}
+                      className="flex-1 py-2 rounded-xl bg-orange-500 hover:bg-orange-400 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors"
+                    >
+                      {isLoading ? <span className="flex items-center justify-center gap-2"><span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />...</span> : 'Set Active'}
+                    </button>
+                  )}
+                  <button
+                    onClick={() => navigate(bot.route)}
+                    className="px-3 py-2 rounded-xl border border-border hover:border-orange-500/30 text-muted hover:text-foreground text-xs font-medium transition-colors"
+                  >
+                    Details
+                  </button>
+                </div>
               </div>
-
-              {/* Trigger */}
-              <div className="flex items-start gap-2 mb-3">
-                <span className="text-xs text-muted mt-0.5">Trigger:</span>
-                <code className={`text-xs px-2 py-0.5 rounded-md font-mono bg-surface2 border border-border ${bot.accent} leading-relaxed`}>
-                  {bot.trigger}
-                </code>
-              </div>
-
-              {/* Description */}
-              <p className="text-xs text-muted mb-4 leading-relaxed">{bot.desc}</p>
-
-              {/* View details button */}
-              <button
-                onClick={() => navigate(bot.route)}
-                className={`w-full py-2 rounded-xl border text-sm font-semibold transition-colors ${bot.accent} bg-transparent hover:bg-surface2 border-current/30`}
-                style={{ borderColor: 'currentColor', opacity: 0.8 }}
-              >
-                View Details →
-              </button>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )

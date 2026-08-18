@@ -106,6 +106,17 @@ export function clearSessions(businessId: string) {
   return request<{ deleted: number }>(`/api/sessions?businessId=${encodeURIComponent(businessId)}`, { method: 'DELETE' })
 }
 
+// Bot flags for hardcoded bots (Flownware, Real Estate)
+export function getBotFlags() {
+  return request<{ flownware: boolean; realestate: boolean }>('/api/bot-flags')
+}
+export function activateBotFlag(botId: string) {
+  return request<{ botId: string; active: boolean }>(`/api/bot-flags/${botId}/activate`, { method: 'POST', body: JSON.stringify({}) })
+}
+export function deactivateBotFlag(botId: string) {
+  return request<{ botId: string; active: boolean }>(`/api/bot-flags/${botId}/deactivate`, { method: 'POST', body: JSON.stringify({}) })
+}
+
 export function pauseSession(id: string) {
   return request<import('./types').Session>(`/api/sessions/${id}/pause`, { method: 'PATCH', body: JSON.stringify({}) })
 }

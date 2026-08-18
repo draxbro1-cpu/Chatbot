@@ -3,16 +3,14 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context'
 
 const navItems = [
-  { to: '/chatbots',           label: 'Chatbots',          icon: '🤖', end: false },
-  { to: '/flownware-chatbot',  label: 'Flownware Bot',     icon: '🚀', end: false },
-  { to: '/realestate-chatbot', label: 'Real Estate Bot',   icon: '🏠', end: false },
-  { to: '/',                   label: 'Dashboard',         icon: '📊', end: true  },
-  { to: '/profile',            label: 'Business Profile',  icon: '🏢', end: false },
-  { to: '/knowledge',          label: 'Knowledge Base',    icon: '📚', end: false },
-  { to: '/media',              label: 'Media Assets',      icon: '🖼️', end: false },
-  { to: '/members',            label: 'Members',           icon: '👥', end: false },
-  { to: '/schedules',          label: 'Schedules',         icon: '📅', end: false },
-  { to: '/sessions',           label: 'WA Sessions',       icon: '💬', end: false },
+  { to: '/chatbots',  label: 'Chatbots',         icon: '🤖', end: false },
+  { to: '/',          label: 'Dashboard',         icon: '📊', end: true  },
+  { to: '/profile',   label: 'Business Profile',  icon: '🏢', end: false },
+  { to: '/knowledge', label: 'Knowledge Base',    icon: '📚', end: false },
+  { to: '/media',     label: 'Media Assets',      icon: '🖼️', end: false },
+  { to: '/members',   label: 'Members',           icon: '👥', end: false },
+  { to: '/schedules', label: 'Schedules',         icon: '📅', end: false },
+  { to: '/sessions',  label: 'WA Sessions',       icon: '💬', end: false },
 ]
 
 function SidebarContent({ onLinkClick }: { onLinkClick?: () => void }) {
