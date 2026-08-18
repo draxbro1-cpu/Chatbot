@@ -1,7 +1,33 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { activateBusiness, deactivateBusiness } from '../api'
 import { useAuth, useToast } from '../context'
 import type { Business } from '../types'
+
+const HARDCODED_BOTS = [
+  {
+    id: 'flownware',
+    name: 'Flownware Bot',
+    type: 'Digital Agency',
+    icon: '🚀',
+    gradient: 'from-blue-500/20 to-cyan-500/10',
+    accent: 'text-blue-400',
+    trigger: 'hi / hello / quote',
+    desc: 'Lead capture bot — 12-step questionnaire for digital marketing services',
+    route: '/flownware',
+  },
+  {
+    id: 'realestate',
+    name: 'Real Estate Bot',
+    type: 'Property',
+    icon: '🏠',
+    gradient: 'from-emerald-500/20 to-teal-500/10',
+    accent: 'text-emerald-400',
+    trigger: 'property / flat / plot / villa',
+    desc: 'Property lead capture — Buy, Sell, Rent with 9-step enquiry flow',
+    route: '/real-estate',
+  },
+]
 
 const BIZ_META: Record<string, { icon: string; gradient: string; accent: string }> = {
   gym:        { icon: '🏋️', gradient: 'from-orange-500/20 to-red-500/10',    accent: 'text-orange-400' },
@@ -15,6 +41,7 @@ const DEFAULT_META = { icon: '🏢', gradient: 'from-gray-500/20 to-gray-500/10'
 export default function Chatbots() {
   const { businesses, setBusinesses } = useAuth()
   const { addToast } = useToast()
+  const navigate = useNavigate()
   const [activating, setActivating] = useState<string | null>(null)
 
   const handleActivate = async (biz: Business) => {
@@ -182,6 +209,67 @@ export default function Chatbots() {
           <p className="text-sm">No chatbots configured yet.</p>
         </div>
       )}
+
+      {/* ── Hardcoded Bots section ─────────────────────────────────────────── */}
+      <div className="mt-8 mb-4">
+        <div className="flex items-center gap-2 mb-1">
+          <h2 className="text-sm font-semibold text-foreground">Always-On Bots</h2>
+          <span className="text-xs text-muted bg-surface2 border border-border rounded-full px-2 py-0.5">Hardcoded — always active</span>
+        </div>
+        <p className="text-xs text-muted">Ye bots hamesha active rehte hain — keyword se trigger hote hain, activate/deactivate nahi hote.</p>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+        {HARDCODED_BOTS.map(bot => (
+          <div
+            key={bot.id}
+            className="relative bg-surface border border-blue-500/20 rounded-2xl overflow-hidden transition-all duration-200 hover:border-blue-500/40 hover:shadow-md"
+          >
+            {/* Top accent bar */}
+            <div className={`h-1 w-full bg-gradient-to-r ${bot.gradient}`} />
+
+            <div className="p-5">
+              {/* Card header */}
+              <div className="flex items-start justify-between gap-3 mb-4">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${bot.gradient} flex items-center justify-center text-xl flex-shrink-0`}>
+                    {bot.icon}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-bold text-foreground leading-tight truncate">{bot.name}</p>
+                    <p className="text-xs text-muted capitalize mt-0.5">{bot.type}</p>
+                  </div>
+                </div>
+                {/* Always active badge */}
+                <span className="flex-shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border bg-green-500/10 text-green-400 border-green-500/20">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                  Active
+                </span>
+              </div>
+
+              {/* Trigger */}
+              <div className="flex items-start gap-2 mb-3">
+                <span className="text-xs text-muted mt-0.5">Trigger:</span>
+                <code className={`text-xs px-2 py-0.5 rounded-md font-mono bg-surface2 border border-border ${bot.accent} leading-relaxed`}>
+                  {bot.trigger}
+                </code>
+              </div>
+
+              {/* Description */}
+              <p className="text-xs text-muted mb-4 leading-relaxed">{bot.desc}</p>
+
+              {/* View details button */}
+              <button
+                onClick={() => navigate(bot.route)}
+                className={`w-full py-2 rounded-xl border text-sm font-semibold transition-colors ${bot.accent} bg-transparent hover:bg-surface2 border-current/30`}
+                style={{ borderColor: 'currentColor', opacity: 0.8 }}
+              >
+                View Details →
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
