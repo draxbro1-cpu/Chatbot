@@ -106,6 +106,14 @@ export function clearSessions(businessId: string) {
   return request<{ deleted: number }>(`/api/sessions?businessId=${encodeURIComponent(businessId)}`, { method: 'DELETE' })
 }
 
+export function pauseSession(id: string) {
+  return request<import('./types').Session>(`/api/sessions/${id}/pause`, { method: 'PATCH', body: JSON.stringify({}) })
+}
+
+export function resumeSession(id: string) {
+  return request<import('./types').Session>(`/api/sessions/${id}/resume`, { method: 'PATCH', body: JSON.stringify({}) })
+}
+
 // Upload file to Cloudinary via backend — returns { url, type }
 export async function uploadFile(file: File): Promise<{ url: string; type: 'image' | 'video' }> {
   const form = new FormData()

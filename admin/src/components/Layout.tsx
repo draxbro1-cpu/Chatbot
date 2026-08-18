@@ -3,14 +3,16 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context'
 
 const navItems = [
-  { to: '/chatbots',  label: 'Chatbots',         icon: '🤖', end: false },
-  { to: '/',          label: 'Dashboard',         icon: '📊', end: true  },
-  { to: '/profile',   label: 'Business Profile',  icon: '🏪', end: false },
-  { to: '/knowledge', label: 'Knowledge Base',    icon: '📚', end: false },
-  { to: '/media',     label: 'Media Assets',      icon: '🎬', end: false },
-  { to: '/members',   label: 'Members',           icon: '👥', end: false },
-  { to: '/schedules', label: 'Schedules',         icon: '📅', end: false },
-  { to: '/sessions',  label: 'WA Sessions',       icon: '💬', end: false },
+  { to: '/chatbots',           label: 'Chatbots',          icon: '🤖', end: false },
+  { to: '/flownware-chatbot',  label: 'Flownware Bot',     icon: '🚀', end: false },
+  { to: '/realestate-chatbot', label: 'Real Estate Bot',   icon: '🏠', end: false },
+  { to: '/',                   label: 'Dashboard',         icon: '📊', end: true  },
+  { to: '/profile',            label: 'Business Profile',  icon: '🏢', end: false },
+  { to: '/knowledge',          label: 'Knowledge Base',    icon: '📚', end: false },
+  { to: '/media',              label: 'Media Assets',      icon: '🖼️', end: false },
+  { to: '/members',            label: 'Members',           icon: '👥', end: false },
+  { to: '/schedules',          label: 'Schedules',         icon: '📅', end: false },
+  { to: '/sessions',           label: 'WA Sessions',       icon: '💬', end: false },
 ]
 
 function SidebarContent({ onLinkClick }: { onLinkClick?: () => void }) {
@@ -132,7 +134,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* TopBar */}
         <header className="flex items-center justify-between px-4 py-3 bg-surface border-b border-border flex-shrink-0 h-14">
-          {/* Hamburger (mobile only) */}
           <button
             className="md:hidden p-1.5 rounded-lg hover:bg-surface2 text-muted hover:text-foreground transition-colors"
             onClick={() => setDrawerOpen(true)}
@@ -144,11 +145,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <rect x="2" y="14" width="16" height="2" rx="1" />
             </svg>
           </button>
-
-          {/* Spacer for desktop (hamburger hidden) */}
           <div className="hidden md:block" />
-
-          {/* Business badge */}
           {currentBiz && (
             <span className="inline-flex items-center gap-1.5 bg-orange-500/10 border border-orange-500/20 text-orange-400 rounded-full px-3 py-1 text-xs font-medium">
               <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />

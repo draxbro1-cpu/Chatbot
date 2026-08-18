@@ -78,6 +78,8 @@ const SessionSchema = new mongoose.Schema({
   phoneNumberId: String,
   messages:      Array,
   lastActivity:  Date,
+  botPaused:     { type: Boolean, default: false },
+  pausedAt:      Date,
 }, { collection: "rag_sessions" });
 
 const Business = mongoose.model("AdminBusiness", BusinessSchema);
@@ -232,6 +234,28 @@ app.get("/api/sessions", auth, wrap(async (req, res) => {
 app.delete("/api/sessions/:id", auth, wrap(async (req, res) => {
   await Session.findByIdAndDelete(req.params.id);
   res.json({ ok: true });
+}));
+
+// Pause bot for a contact — admin takes over manually
+app.patch("/api/sessions/:id/pause", auth, wrap(async (req, res) => {
+  const session = await Session.findByIdAndUpdate(
+    req.params.id,
+    { botPaused: true, pausedAt: new Date() },
+    { new: true }
+  ).lean();
+  if (!session) return res.status(404).json({ error: "Session not found" });
+  res.json(session);
+}));
+
+// Resume bot for a contact
+app.patch("/api/sessions/:id/resume", auth, wrap(async (req, res) => {
+  const session = await Session.findByIdAndUpdate(
+    req.params.id,
+    { botPaused: false, pausedAt: null },
+    { new: true }
+  ).lean();
+  if (!session) return res.status(404).json({ error: "Session not found" });
+  res.json(session);
 }));
 
 app.delete("/api/sessions", auth, wrap(async (req, res) => {

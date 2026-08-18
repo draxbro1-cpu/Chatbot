@@ -58,6 +58,8 @@ export interface Session {
   businessId: string
   messages: unknown[]
   lastActivity?: string
+  botPaused?: boolean
+  pausedAt?: string
 }
 
 export interface Stats {

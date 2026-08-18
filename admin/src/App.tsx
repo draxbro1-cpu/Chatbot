@@ -10,6 +10,8 @@ import Members from './pages/Members'
 import Schedules from './pages/Schedules'
 import Sessions from './pages/Sessions'
 import Chatbots from './pages/Chatbots'
+import FlownwareChatbot from './pages/FlownwareChatbot'
+import RealEstateChatbot from './pages/RealEstateChatbot'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isLoggedIn } = useAuth()
@@ -24,71 +26,16 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/profile"
-        element={
-          <ProtectedRoute>
-            <Profile />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/knowledge"
-        element={
-          <ProtectedRoute>
-            <Knowledge />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/media"
-        element={
-          <ProtectedRoute>
-            <Media />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/members"
-        element={
-          <ProtectedRoute>
-            <Members />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/schedules"
-        element={
-          <ProtectedRoute>
-            <Schedules />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/sessions"
-        element={
-          <ProtectedRoute>
-            <Sessions />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/chatbots"
-        element={
-          <ProtectedRoute>
-            <Chatbots />
-          </ProtectedRoute>
-        }
-      />
-      {/* Catch-all */}
+      <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+      <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+      <Route path="/knowledge" element={<ProtectedRoute><Knowledge /></ProtectedRoute>} />
+      <Route path="/media" element={<ProtectedRoute><Media /></ProtectedRoute>} />
+      <Route path="/members" element={<ProtectedRoute><Members /></ProtectedRoute>} />
+      <Route path="/schedules" element={<ProtectedRoute><Schedules /></ProtectedRoute>} />
+      <Route path="/sessions" element={<ProtectedRoute><Sessions /></ProtectedRoute>} />
+      <Route path="/chatbots" element={<ProtectedRoute><Chatbots /></ProtectedRoute>} />
+      <Route path="/flownware-chatbot" element={<ProtectedRoute><FlownwareChatbot /></ProtectedRoute>} />
+      <Route path="/realestate-chatbot" element={<ProtectedRoute><RealEstateChatbot /></ProtectedRoute>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
